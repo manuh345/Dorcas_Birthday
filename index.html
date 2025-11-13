@@ -159,6 +159,10 @@
   <audio id="bgMusic" loop preload="none">
     <source src="img/Happy Birthday Song!!! - Happy Birthday.mp3" type="audio/mpeg">  </audio>
 
+
+
+
+  
  <script>
     // Gallery modal functionality
     const gallery = document.getElementById('gallery');
@@ -179,8 +183,8 @@
     // Fetch wishes from PHP backend
     async function fetchWishes() {
       try {
-        const response = await fetch('/wishes.php'');
-        const wishes = await response.json('/wishes.php');
+        const response = await fetch('wishes.php');
+        const wishes = await response.json();
         displayWishes(wishes);
       } catch (error) {
         console.error('Error fetching wishes:', error);
@@ -389,6 +393,7 @@
 </script>
 </body>
 </html>
+
 
 
 
