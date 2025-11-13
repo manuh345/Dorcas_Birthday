@@ -163,7 +163,8 @@
 
 
   
- <script>
+ 
+    <script>
     // Gallery modal functionality
     const gallery = document.getElementById('gallery');
     const modal = document.getElementById('modal');
@@ -175,7 +176,97 @@
       }
     });
     modal.addEventListener('click', ()=> modal.classList.remove('show'));
+
+    // Wishes board with PHP backend
+    const wishesList = document.getElementById('wishesList');
+    const wishForm = document.getElementById('wishForm');
+
+    // Fetch wishes from PHP backend
+    async function fetchWishes() {
+      try {
+        const response = await fetch('wishes.php');
+        const wishes = await response.json();
+        displayWishes(wishes);
+      } catch (error) {
+        console.error('Error fetching wishes:', error);
+        // Show fallback if PHP fails
+        wishesList.innerHTML = '<div class="wish">Make sure wishes.php is on your server to save wishes.</div>';
+      }
+    }
+
+    function displayWishes(wishes) {
+      wishesList.innerHTML = '';
+      
+      if (wishes.length === 0) {
+        wishesList.innerHTML = '<div class="wish">No wishes yet. Be the first to wish happy birthday!</div>';
+        return;
+      }
+      
+      wishes.forEach(wish => {
+        const el = document.createElement('div');
+        el.className = 'wish';
         
+        // Format timestamp nicely
+        const date = new Date(wish.timestamp);
+        const timeString = date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        el.innerHTML = `
+          <div><strong>${escapeHtml(wish.name)}</strong></div>
+          <div>${escapeHtml(wish.text)}</div>
+          <div style="font-size: 0.8em; color: #888; margin-top: 4px;">${timeString}</div>
+        `;
+        wishesList.appendChild(el);
+      });
+    }
+
+    // Submit new wish to PHP backend
+    wishForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = document.getElementById('wishName').value.trim();
+      const text = document.getElementById('wishText').value.trim();
+      
+      if(!text) return;
+      
+      try {
+        // Show loading state
+        const submitBtn = wishForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Posting...';
+        submitBtn.disabled = true;
+        
+        // Send to PHP backend
+        const response = await fetch('wishes.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: name,
+            text: text
+          })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+          wishForm.reset();
+          await fetchWishes(); // Refresh the list from server
+        } else {
+          throw new Error('Failed to post wish');
+        }
+      } catch (error) {
+        console.error('Error posting wish:', error);
+        alert('Sorry, there was an error posting your wish. Please try again.');
+        // Fallback: add locally if PHP fails
+        const el = document.createElement('div');
+        el.className = 'wish';
+        el.innerHTML = `<strong>${name?escapeHtml(name):'Friend'}</strong>: ${escapeHtml(text)}`;
+        wishesList.prepend(el);
+      } finally {
+        // Reset button state
+        const submitBtn = wishForm.querySelector('button[type="submit"]');
+        submitBtn.textContent = 'Post wish';
+        submitBtn.disabled = false;
+      }
     });
 
     function escapeHtml(s){return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}
@@ -298,41 +389,13 @@
     }
     animate();
 
-    
-   // Load wishes from local storage on page load
-function loadWishes() {
-    const savedWishes = localStorage.getItem('birthdayWishes');
-    if (savedWishes) {
-        wishesList.innerHTML = savedWishes;
-    }
-}
-
-// Save wishes whenever new ones are added
-function saveWishes() {
-    localStorage.setItem('birthdayWishes', wishesList.innerHTML);
-}
-
-// Update your existing submit function:
-wishForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const name = document.getElementById('wishName').value.trim();
-    const text = document.getElementById('wishText').value.trim();
-    if(!text) return;
-    
-    const el = document.createElement('div'); 
-    el.className='wish';
-    el.innerHTML = `<strong>${name?escapeHtml(name):'Friend'}</strong>: ${escapeHtml(text)}`;
-    wishesList.prepend(el);
-    
-    saveWishes(); // Save to local storage
-    wishForm.reset();
-});
-
-// Load wishes when page opens
-document.addEventListener('DOMContentLoaded', loadWishes);
+    // Load wishes when page loads
+    document.addEventListener('DOMContentLoaded', fetchWishes);
 </script>
+
 </body>
 </html>
+
 
 
 
