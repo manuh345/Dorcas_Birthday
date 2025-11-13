@@ -1,0 +1,9 @@
+$file = 'wishes.json';
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (file_exists($file)) {  // ← This returns FALSE
+        echo file_get_contents($file);
+    } else {
+        echo '[]';  // ← This should work but other parts fail
+    }
+}
