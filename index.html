@@ -179,8 +179,8 @@
     // Fetch wishes from PHP backend
     async function fetchWishes() {
       try {
-        const response = await fetch('wishes.php');
-        const wishes = await response.json();
+        const response = await fetch('/wishes.php'');
+        const wishes = await response.json('/wishes.php');
         displayWishes(wishes);
       } catch (error) {
         console.error('Error fetching wishes:', error);
@@ -389,6 +389,7 @@
 </script>
 </body>
 </html>
+
 
 
 
