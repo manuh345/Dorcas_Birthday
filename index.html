@@ -43,6 +43,8 @@
     /* Wishes board */
     .wishes-list{max-height:260px;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:8px}
     .wish{padding:10px;border-radius:8px;background:linear-gradient(90deg,#fff,#fffafa);border:1px solid rgba(0,0,0,0.03)}
+    form .row{display:flex;gap:8px}
+    input[type=text],textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08)}
 
     footer{margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem}
 
@@ -120,14 +122,23 @@
 
       <aside>
         <div class="card">
-          <h3>Birthday Wishes</h3>
+          <h3>Wishes Wall</h3>
           <div class="wishes-list" id="wishesList">
             <div class="wish">Happy birthday! Wishing you endless joy 🎈</div>
             <div class="wish">Keep shining — more wins ahead ✨</div>
-            <div class="wish">Hope your day is filled with happiness! 💫</div>
-            <div class="wish">Cheers to amazing memories! 🥳</div>
-            <div class="wish">Sending you love on your special day! 💖</div>
           </div>
+
+          <form id="wishForm" style="margin-top:12px">
+            <div class="row">
+              <input id="wishName" type="text" placeholder="Your name (optional)">
+            </div>
+            <div style="margin-top:8px">
+              <textarea id="wishText" rows="3" placeholder="Write your birthday wish..." required></textarea>
+            </div>
+            <div style="margin-top:8px">
+              <button type="submit" class="cta">Post wish</button>
+            </div>
+          </form>
         </div>
       </aside>
     </div>
@@ -152,6 +163,47 @@
       }
     });
     modal.addEventListener('click', ()=> modal.classList.remove('show'));
+
+    // Wishes board with Local Storage
+    const wishesList = document.getElementById('wishesList');
+    const wishForm = document.getElementById('wishForm');
+
+    // Load wishes from local storage when page loads
+    function loadWishes() {
+      const savedWishes = localStorage.getItem('birthdayWishes');
+      if (savedWishes) {
+        wishesList.innerHTML = savedWishes;
+      }
+    }
+
+    // Save wishes to local storage
+    function saveWishes() {
+      localStorage.setItem('birthdayWishes', wishesList.innerHTML);
+    }
+
+    // Add new wish
+    wishForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('wishName').value.trim();
+      const text = document.getElementById('wishText').value.trim();
+      
+      if(!text) return;
+      
+      const el = document.createElement('div'); 
+      el.className = 'wish';
+      el.innerHTML = `<strong>${name ? escapeHtml(name) : 'Friend'}</strong>: ${escapeHtml(text)}`;
+      wishesList.prepend(el);
+      
+      saveWishes(); // Save to local storage
+      wishForm.reset();
+    });
+
+    function escapeHtml(s) {
+      return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    }
+
+    // Load existing wishes when page opens
+    document.addEventListener('DOMContentLoaded', loadWishes);
 
     // Music control
     const musicBtn = document.getElementById('musicToggle');
