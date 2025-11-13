@@ -301,7 +301,138 @@ class Heart {
     }
     animate();
 
+    // Your existing gallery and modal code remains the same
+    const gallery = document.getElementById('gallery');
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modalImg');
+    gallery.addEventListener('click', e=>{
+      if(e.target.tagName==='IMG'){
+        modalImg.src = e.target.src;
+        modal.classList.add('show');
+      }
+    });
+    modal.addEventListener('click', ()=> modal.classList.remove('show'));
+
+    // UPDATED: Wishes board with PHP backend
+    const wishesList = document.getElementById('wishesList');
+    const wishForm = document.getElementById('wishForm');
+
+    // Function to fetch and display wishes from PHP backend
+    async function fetchWishes() {
+      try {
+        const response = await fetch('wishes.php');
+        const wishes = await response.json();
+        displayWishes(wishes);
+      } catch (error) {
+        console.error('Error fetching wishes:', error);
+        // Show fallback message if PHP is not working
+        wishesList.innerHTML = '<div class="wish">Unable to load wishes. Make sure wishes.php is on your server.</div>';
+      }
+    }
+
+    function displayWishes(wishes) {
+      wishesList.innerHTML = '';
+      
+      if (wishes.length === 0) {
+        wishesList.innerHTML = '<div class="wish">No wishes yet. Be the first to wish happy birthday!</div>';
+        return;
+      }
+      
+      wishes.forEach(wish => {
+        const el = document.createElement('div');
+        el.className = 'wish';
+        
+        // Format timestamp nicely
+        const date = new Date(wish.timestamp);
+        const timeString = date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        el.innerHTML = `
+          <div><strong>${escapeHtml(wish.name)}</strong></div>
+          <div>${escapeHtml(wish.text)}</div>
+          <div style="font-size: 0.8em; color: #888; margin-top: 4px;">${timeString}</div>
+        `;
+        wishesList.appendChild(el);
+      });
+    }
+
+    // UPDATED: Form submission to use PHP backend
+    wishForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = document.getElementById('wishName').value.trim();
+      const text = document.getElementById('wishText').value.trim();
+      
+      if(!text) return;
+      
+      try {
+        // Show loading state
+        const submitBtn = wishForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Posting...';
+        submitBtn.disabled = true;
+        
+        // Send to PHP backend instead of just local display
+        const response = await fetch('wishes.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: name,
+            text: text
+          })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+          wishForm.reset();
+          await fetchWishes(); // Refresh the list from server
+        } else {
+          throw new Error('Failed to post wish');
+        }
+      } catch (error) {
+        console.error('Error posting wish:', error);
+        alert('Sorry, there was an error posting your wish. Please try again.');
+        // Fallback: add locally if PHP fails
+        const el = document.createElement('div');
+        el.className = 'wish';
+        el.innerHTML = `<strong>${name || 'Friend'}</strong>: ${escapeHtml(text)}`;
+        wishesList.prepend(el);
+      } finally {
+        // Reset button state
+        const submitBtn = wishForm.querySelector('button[type="submit"]');
+        submitBtn.textContent = 'Post wish';
+        submitBtn.disabled = false;
+      }
+    });
+
+    function escapeHtml(s){
+      return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    }
+
+    // Load wishes when page loads
+    document.addEventListener('DOMContentLoaded', fetchWishes);
+
+    // Your existing music and confetti code remains the same
+    const musicBtn = document.getElementById('musicToggle');
+    const bgMusic = document.getElementById('bgMusic');
+    let isPlaying = false;
+
+    musicBtn.addEventListener('click', () => {
+      if (!isPlaying) {
+        bgMusic.play().catch(err => alert('Playback blocked. Click the button again.'));
+        musicBtn.textContent = '⏸ Pause music';
+        isPlaying = true;
+      } else {
+        bgMusic.pause();
+        musicBtn.textContent = '▶ Play music';
+        isPlaying = false;
+      }
+    });
+
+    // Your existing confetti and hearts code...
+
   </script>
 </body>
 </html>
+
 
