@@ -6,8 +6,13 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 $file = 'wishes.json';
 
+// Create file if it doesn't exist
+if (!file_exists($file)) {
+    file_put_contents($file, '[]');
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    if (file_exists($file)) {
+    if (file_exists($file) && filesize($file) > 0) {
         echo file_get_contents($file);
     } else {
         echo '[]';
@@ -16,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $input = json_decode(file_get_contents('php://input'), true);
     
     $wishes = [];
-    if (file_exists($file)) {
+    if (file_exists($file) && filesize($file) > 0) {
         $wishes = json_decode(file_get_contents($file), true);
     }
     
