@@ -390,9 +390,41 @@
 
     // Load wishes when page loads
     document.addEventListener('DOMContentLoaded', fetchWishes);
+   // Load wishes from local storage on page load
+function loadWishes() {
+    const savedWishes = localStorage.getItem('birthdayWishes');
+    if (savedWishes) {
+        wishesList.innerHTML = savedWishes;
+    }
+}
+
+// Save wishes whenever new ones are added
+function saveWishes() {
+    localStorage.setItem('birthdayWishes', wishesList.innerHTML);
+}
+
+// Update your existing submit function:
+wishForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const name = document.getElementById('wishName').value.trim();
+    const text = document.getElementById('wishText').value.trim();
+    if(!text) return;
+    
+    const el = document.createElement('div'); 
+    el.className='wish';
+    el.innerHTML = `<strong>${name?escapeHtml(name):'Friend'}</strong>: ${escapeHtml(text)}`;
+    wishesList.prepend(el);
+    
+    saveWishes(); // Save to local storage
+    wishForm.reset();
+});
+
+// Load wishes when page opens
+document.addEventListener('DOMContentLoaded', loadWishes);
 </script>
 </body>
 </html>
+
 
 
 
