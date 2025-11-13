@@ -40,15 +40,9 @@
     .gallery img{width:100%;height:100%;object-fit:cover;border-radius:10px;cursor:pointer;transition:transform .18s}
     .gallery img:hover{transform:scale(1.03)}
 
-    /* Memories */
-    .memories{margin-top:12px}
-    .memory{padding:10px;border-radius:10px;background:linear-gradient(180deg,var(--accent-2),#fff);margin-bottom:8px}
-
     /* Wishes board */
     .wishes-list{max-height:260px;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:8px}
     .wish{padding:10px;border-radius:8px;background:linear-gradient(90deg,#fff,#fffafa);border:1px solid rgba(0,0,0,0.03)}
-    form .row{display:flex;gap:8px}
-    input[type=text],textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08)}
 
     footer{margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem}
 
@@ -72,7 +66,6 @@
     z-index: 40;
     }
 
-
     .cta{display:inline-block;padding:10px 14px;border-radius:10px;background:linear-gradient(90deg,var(--accent),#ff5aa7);color:white;text-decoration:none}
   </style>
 </head>
@@ -87,7 +80,6 @@
         <p class="lead">Wishing you love, laughter, and many beautiful years ahead.</p>
     <div style="margin-top:8px">
     <button class="music-btn" id="musicToggle">▶ Play music</button>
-    <a class="cta" href="#wishes">Leave a wish</a>
     </div>
 
 <!-- Audio Element -->
@@ -101,14 +93,13 @@
       <main>
         <section class="card">
           <h2 style="margin-top:0">A special message</h2>
-          <p class="message">Dear <strong id="nameInline">DORCAS </strong>, today we celebrate you — your kindness, your laughter, and the light you bring to everyone around you. Thank you for being you. Here’s to more adventures, late-night talks, and dreams come true.</p>
+          <p class="message">Dear <strong id="nameInline">DORCAS </strong>, today we celebrate you — your kindness, your laughter, and the light you bring to everyone around you. Thank you for being you. Here's to more adventures, late-night talks, and dreams come true.</p>
         </section>
 
         <section class="card" style="margin-top:14px">
           <h3>Gallery</h3>
           <div class="gallery" id="gallery">
-            <!-- replace src with real photos -->
-            <img src="img/ch.jfif"alt="DORCAS">
+            <img src="img/ch.jfif" alt="DORCAS">
             <img src="img/Dorcas.jpg" alt="DORCAS">
             <img src="img/dr.jfif" alt="DORCAS">
           </div>
@@ -118,32 +109,26 @@
   <h2 style="font-size: 2em; color: #ff5fa2; margin-bottom: 20px;">✨ Special Birthday Wishes ✨</h2>
   <p style="font-size: 1.2em; color: #333; line-height: 1.6;">
     May this day bring you endless joy, laughter, and the kind of happiness that lingers all year long.
-    You’re truly one of a kind — and you deserve all the beauty this life has to offer. 💖
+    You're truly one of a kind — and you deserve all the beauty this life has to offer. 💖
   </p>
   <p style="font-size: 1.1em; color: #555; margin-top: 20px;">
     Cheers to more smiles, more adventures, and more amazing years ahead! 🥂
   </p>
 </section>
 
-
       </main>
 
       <aside>
         <div class="card">
-          <h3 id="wishes">Wishes Wall</h3>
+          <h3>Birthday Wishes</h3>
           <div class="wishes-list" id="wishesList">
             <div class="wish">Happy birthday! Wishing you endless joy 🎈</div>
             <div class="wish">Keep shining — more wins ahead ✨</div>
+            <div class="wish">Hope your day is filled with happiness! 💫</div>
+            <div class="wish">Cheers to amazing memories! 🥳</div>
+            <div class="wish">Sending you love on your special day! 💖</div>
           </div>
-
-          <form id="wishForm" style="margin-top:12px">
-            <div class="row"><input id="wishName" type="text" placeholder="Your name (optional)"></div>
-            <div style="margin-top:8px"><textarea id="wishText" rows="3" placeholder="Write your birthday wish..." required></textarea></div>
-            <div style="margin-top:8px"><button type="submit" class="cta">Post wish</button></div>
-          </form>
-
         </div>
-
       </aside>
     </div>
 
@@ -155,16 +140,7 @@
   <!-- Image modal -->
   <div class="modal" id="modal"><img id="modalImg" src="" alt=""></div>
 
-  <!-- Background music (replace src with your audio file) -->
-  <audio id="bgMusic" loop preload="none">
-    <source src="img/Happy Birthday Song!!! - Happy Birthday.mp3" type="audio/mpeg">  </audio>
-
-
-
-
-  
- 
-    <script>
+  <script>
     // Gallery modal functionality
     const gallery = document.getElementById('gallery');
     const modal = document.getElementById('modal');
@@ -176,100 +152,6 @@
       }
     });
     modal.addEventListener('click', ()=> modal.classList.remove('show'));
-
-    // Wishes board with PHP backend
-    const wishesList = document.getElementById('wishesList');
-    const wishForm = document.getElementById('wishForm');
-
-    // Fetch wishes from PHP backend
-    async function fetchWishes() {
-      try {
-        const response = await fetch('wishes.php');
-        const wishes = await response.json();
-        displayWishes(wishes);
-      } catch (error) {
-        console.error('Error fetching wishes:', error);
-        // Show fallback if PHP fails
-        wishesList.innerHTML = '<div class="wish">Make sure wishes.php is on your server to save wishes.</div>';
-      }
-    }
-
-    function displayWishes(wishes) {
-      wishesList.innerHTML = '';
-      
-      if (wishes.length === 0) {
-        wishesList.innerHTML = '<div class="wish">No wishes yet. Be the first to wish happy birthday!</div>';
-        return;
-      }
-      
-      wishes.forEach(wish => {
-        const el = document.createElement('div');
-        el.className = 'wish';
-        
-        // Format timestamp nicely
-        const date = new Date(wish.timestamp);
-        const timeString = date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        el.innerHTML = `
-          <div><strong>${escapeHtml(wish.name)}</strong></div>
-          <div>${escapeHtml(wish.text)}</div>
-          <div style="font-size: 0.8em; color: #888; margin-top: 4px;">${timeString}</div>
-        `;
-        wishesList.appendChild(el);
-      });
-    }
-
-    // Submit new wish to PHP backend
-    wishForm.addEventListener('submit', async e => {
-      e.preventDefault();
-      const name = document.getElementById('wishName').value.trim();
-      const text = document.getElementById('wishText').value.trim();
-      
-      if(!text) return;
-      
-      try {
-        // Show loading state
-        const submitBtn = wishForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Posting...';
-        submitBtn.disabled = true;
-        
-        // Send to PHP backend
-        const response = await fetch('wishes.php', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: name,
-            text: text
-          })
-        });
-        
-        const result = await response.json();
-        if (result.success) {
-          wishForm.reset();
-          await fetchWishes(); // Refresh the list from server
-        } else {
-          throw new Error('Failed to post wish');
-        }
-      } catch (error) {
-        console.error('Error posting wish:', error);
-        alert('Sorry, there was an error posting your wish. Please try again.');
-        // Fallback: add locally if PHP fails
-        const el = document.createElement('div');
-        el.className = 'wish';
-        el.innerHTML = `<strong>${name?escapeHtml(name):'Friend'}</strong>: ${escapeHtml(text)}`;
-        wishesList.prepend(el);
-      } finally {
-        // Reset button state
-        const submitBtn = wishForm.querySelector('button[type="submit"]');
-        submitBtn.textContent = 'Post wish';
-        submitBtn.disabled = false;
-      }
-    });
-
-    function escapeHtml(s){return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}
 
     // Music control
     const musicBtn = document.getElementById('musicToggle');
@@ -388,18 +270,6 @@
       requestAnimationFrame(animate);
     }
     animate();
-
-    // Load wishes when page loads
-    document.addEventListener('DOMContentLoaded', fetchWishes);
-</script>
-
+  </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
